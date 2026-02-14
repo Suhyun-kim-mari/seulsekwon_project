@@ -468,6 +468,24 @@ def create_price_map(lat, lon, re_data, radius_km):
             tooltip=f"{row['BLDG_NM']} ({row['price_억']:.1f}억)"
         ).add_to(m)
     
+    # 🎨 범례 추가
+    legend_html = f'''
+     <div style="position: fixed; 
+     bottom: 30px; left: 30px; width: 140px; height: auto; 
+     border: 2px solid #e2e8f0; z-index: 9999; font-size: 13px;
+     background-color: white; padding: 10px; border-radius: 10px;
+     box-shadow: 0 4px 15px rgba(0,0,0,0.1); pointer-events: none;
+     font-family: 'Pretendard', sans-serif;">
+     <p style="margin-bottom: 8px; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px;">💰 가격 범례</p>
+     <div style="display:flex; align-items:center; margin-bottom:4px;"><span style="background:darkred; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>20억↑</div>
+     <div style="display:flex; align-items:center; margin-bottom:4px;"><span style="background:red; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>15억 ~ 20억</div>
+     <div style="display:flex; align-items:center; margin-bottom:4px;"><span style="background:orange; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>10억 ~ 15억</div>
+     <div style="display:flex; align-items:center; margin-bottom:4px;"><span style="background:green; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>5억 ~ 10억</div>
+     <div style="display:flex; align-items:center;"><span style="background:blue; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>5억 미만</div>
+     </div>
+    '''
+    m.get_root().html.add_child(folium.Element(legend_html))
+    
     return m
 
 # ==========================================
