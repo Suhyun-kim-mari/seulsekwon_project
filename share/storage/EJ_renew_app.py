@@ -756,16 +756,18 @@ def main():
             col1, col2 = st.columns([1, 1])
             
             with col1:
-                st.markdown('<div class="dashboard-card"><h4>💰 가격대별 분포 (억 단위)</h4>', unsafe_allow_html=True)
-                fig_hist = px.histogram(recent_re, x="price_억", nbins=30, 
-                                       color_discrete_sequence=[THEME['primary']],
-                                       labels={'price_억': '거래가 (억 원)', 'count': '거래 건수'})
-                fig_hist.update_layout(
+                st.markdown('<div class="dashboard-card"><h4>💰 면적 대비 가격 분포 (산포도)</h4>', unsafe_allow_html=True)
+                fig_scatter = px.scatter(recent_re, x="ARCH_AREA", y="price_억",
+                                       color="price_억", color_continuous_scale="Viridis",
+                                       hover_data=["BLDG_NM", "RCPT_YR"],
+                                       labels={'ARCH_AREA': '전용면적 (㎡)', 'price_억': '거래가 (억 원)'})
+                fig_scatter.update_layout(
                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                     font=dict(family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif", color=THEME['secondary']),
-                    margin=dict(t=10, b=10, l=10, r=10), height=350
+                    margin=dict(t=10, b=10, l=10, r=10), height=350,
+                    showlegend=False
                 )
-                st.plotly_chart(fig_hist, use_container_width=True)
+                st.plotly_chart(fig_scatter, use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
 
             with col2:
