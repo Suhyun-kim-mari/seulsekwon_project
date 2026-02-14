@@ -380,7 +380,7 @@ def create_viz_objects(total_score, scores, counts, facilities, raw_progress):
     layout_base = dict(
         paper_bgcolor='rgba(0,0,0,0)', 
         plot_bgcolor='rgba(0,0,0,0)', 
-        font=dict(family="Pretendard", color=THEME['secondary'])
+        font=dict(family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif", color=THEME['secondary'])
     )
     
     fig_radar = go.Figure()
@@ -438,8 +438,18 @@ def create_folium_map(lat, lon, facilities, radius_m):
             {f['emoji']}
         </div>
         """
-        folium.Marker([f['lat'], f['lon']], icon=folium.DivIcon(html=html),
-                      popup=f"<b>{f['name']}</b><br>{f['distance']:.0f}m ({f['sub_category']})").add_to(m)
+        popup_html = f"""
+        <div style="font-family: 'Pretendard', sans-serif; font-size: 13px;">
+            <b style="color: {THEME['primary']};">{f['name']}</b><br>
+            거리: {f['distance']:.0f}m
+        </div>
+        """
+        folium.Marker(
+            [f['lat'], f['lon']],
+            icon=folium.DivIcon(html=html),
+            popup=folium.Popup(popup_html, max_width=200),
+            tooltip=f"{f['emoji']} {f['name']}"
+        ).add_to(m)
     return m
 
 def create_price_map(lat, lon, re_data, radius_km):
@@ -460,6 +470,14 @@ def create_price_map(lat, lon, re_data, radius_km):
     
     for _, row in display_data.iterrows():
         color = get_color(row['price_억'])
+        popup_html = f"""
+        <div style="font-family: 'Pretendard', sans-serif; font-size: 13px;">
+            <b style="color: {color};">{row['BLDG_NM']}</b><br>
+            가격: <b>{row['price_억']:.1f}억</b><br>
+            면적: {row['ARCH_AREA']:.1f}㎡<br>
+            연도: {row['RCPT_YR']}
+        </div>
+        """
         folium.CircleMarker(
             location=[row['latitude'], row['longitude']],
             radius=5,
@@ -467,7 +485,7 @@ def create_price_map(lat, lon, re_data, radius_km):
             fill=True,
             fill_color=color,
             fill_opacity=0.7,
-            popup=f"<b>{row['BLDG_NM']}</b><br>가격: {row['price_억']:.1f}억<br>면적: {row['ARCH_AREA']:.1f}㎡<br>연도: {row['RCPT_YR']}",
+            popup=folium.Popup(popup_html, max_width=250),
             tooltip=f"{row['BLDG_NM']} ({row['price_억']:.1f}억)"
         ).add_to(m)
     
@@ -694,6 +712,7 @@ def main():
                                        labels={'price_억': '거래가 (억 원)', 'count': '거래 건수'})
                 fig_hist.update_layout(
                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif", color=THEME['secondary']),
                     margin=dict(t=10, b=10, l=10, r=10), height=350
                 )
                 st.plotly_chart(fig_hist, use_container_width=True)
