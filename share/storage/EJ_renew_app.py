@@ -568,154 +568,151 @@ def main():
         st.download_button("📊 분석 데이터 CSV", data=pd.DataFrame(facilities).to_csv(index=False).encode('utf-8-sig'), 
                            file_name=f"analysis_{datetime.datetime.now().strftime('%Y%m%d')}.csv", use_container_width=True)
 
-    # 7. AI Analysis Section (Moved)
-    st.markdown("---")
-    st.markdown(f'### 🤖 AI 실거주 분석 리포트')
-    ai_comment = get_ai_analysis_report(t_score, counts, st.session_state.config['weights'])
-    st.markdown(f"""
-<div class="dashboard-card" style="border-left: 5px solid {THEME['accent']}; display: flex; align-items: flex-start; gap: 15px;">
-<div style="font-size: 1.5rem; margin-top: 5px;">💡</div>
-<div style="flex: 1;">
-<p style="font-size: 1.1rem; line-height: 1.7; margin: 0; color: {THEME['text_main']};">{ai_comment}</p>
-</div>
-</div>
-""", unsafe_allow_html=True)
+    # ✨ 탭 시스템 추가 (검색창 아래)
+    tab1, tab2 = st.tabs(["🏙️ 슬세권 인프라 분석", "🏠 주변 실거래가 분석"])
 
-    # 6. Performance Layout
-    col_l, col_r = st.columns([2, 1])
-    with col_l:
-        st.markdown(f'<div class="dashboard-card"><h3>🗺️ 인프라 분포도: {st.session_state.config["address"]}</h3>', unsafe_allow_html=True)
-        
-        # 지도 필터 UI 추가
-        selected_groups = st.multiselect("표시할 시설 선택", options=list(CATEGORY_GROUPS.keys()), default=list(CATEGORY_GROUPS.keys()), key="map_view_filter")
-        filtered_facilities = [f for f in facilities if f['group'] in selected_groups]
-
-        folium_map = create_folium_map(st.session_state.config['coords'][0], st.session_state.config['coords'][1], filtered_facilities, st.session_state.config['radius'])
-        map_interaction = st_folium(folium_map, width="100%", height=500, key="main_map")
-        
-        if map_interaction and map_interaction.get("last_clicked"):
-            nc = (map_interaction["last_clicked"]["lat"], map_interaction["last_clicked"]["lng"])
-            if round(nc[0], 5) != round(st.session_state.config['coords'][0], 5):
-                st.session_state.config['coords'] = nc
-                st.session_state.config['address'] = f"지정 포인트 ({nc[0]:.4f}, {nc[1]:.4f})"
-                st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with col_r:
-        # 박스 레이아웃 깨짐 방지를 위해 HTML/CSS로 게이지 구현
-        if t_score >= 90: grade_char = "s"
-        elif t_score >= 75: grade_char = "a"
-        elif t_score >= 60: grade_char = "b"
-        elif t_score >= 40: grade_char = "c"
-        else: grade_char = "d"
-        
+    with tab1:
+        # 7. AI Analysis Section
+        st.markdown(f'### 🤖 AI 실거주 분석 리포트')
+        ai_comment = get_ai_analysis_report(t_score, counts, st.session_state.config['weights'])
         st.markdown(f"""
-<div class="dashboard-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 20px;">
-<h3 style="text-align: center; margin-bottom: 10px;">💡 종합 편의 기여도</h3>
-<div class="metric-value">{t_score}</div>
-<div class="grade-badge grade-{grade_char}">{grade_char.upper()} GRADE</div>
-<div style="margin-top: 25px; width: 100%;">
-<div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:bold; color:#64748b; font-size: 0.8rem;">
-<span>0</span><span>100</span>
-</div>
-<div style="background: #e2e8f0; border-radius: 12px; height: 16px; width: 100%; overflow: hidden;">
-<div style="background: linear-gradient(90deg, {THEME['primary']}, {THEME['accent']}); width: {t_score}%; height: 100%; border-radius: 12px;"></div>
-</div>
-</div>
-<p style="text-align: center; color: #64748b; margin-top: 20px; font-size: 0.9rem;">주변 인프라 밀도 분석 결과입니다.</p>
-</div>
-""", unsafe_allow_html=True)
+        <div class="dashboard-card" style="border-left: 5px solid {THEME['accent']}; display: flex; align-items: flex-start; gap: 15px;">
+        <div style="font-size: 1.5rem; margin-top: 5px;">💡</div>
+        <div style="flex: 1;">
+        <p style="font-size: 1.1rem; line-height: 1.7; margin: 0; color: {THEME['text_main']};">{ai_comment}</p>
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
 
+        # 6. Performance Layout (Map & Gauge)
+        col_l, col_r = st.columns([2, 1])
+        with col_l:
+            st.markdown(f'<div class="dashboard-card"><h3>🗺️ 인프라 분포도: {st.session_state.config["address"]}</h3>', unsafe_allow_html=True)
+            
+            # 지도 필터 UI
+            selected_groups = st.multiselect("표시할 시설 선택", options=list(CATEGORY_GROUPS.keys()), default=list(CATEGORY_GROUPS.keys()), key="map_view_filter")
+            filtered_facilities = [f for f in facilities if f['group'] in selected_groups]
 
-
-    # 8. Detailed Charts
-    st.markdown("### 📈 상세 데이터 분석")
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.markdown('<div class="dashboard-card"><h4>📊 카테고리 밸런스</h4>', unsafe_allow_html=True)
-        st.plotly_chart(viz['radar'], use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    with c2:
-        st.markdown('<div class="dashboard-card"><h4>⚖️ 인프라 구성 비교</h4>', unsafe_allow_html=True)
-        st.plotly_chart(viz['compare'], use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    with c3:
-        st.markdown('<div class="dashboard-card"><h4>📋 주요 시설 통계</h4>', unsafe_allow_html=True)
-        stats_df = pd.DataFrame(counts.items(), columns=['분류', '개수']).sort_values('개수', ascending=False)
-        st.dataframe(stats_df, hide_index=True, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with st.expander("📍 전체 시설 리스트 보기", expanded=False):
-        if facilities:
-            st.dataframe(pd.DataFrame(facilities)[['group', 'name', 'distance', 'emoji']], use_container_width=True)
-        else:
-            st.info("데이터가 없습니다.")
-
-    # 9. Real Estate Analysis Section (3km Radius)
-    st.markdown("---")
-    st.markdown("### 🏠 반경 3km 내 실거래가 분포 분석")
-    
-    with st.spinner("주변 실거래 데이터 분석 중..."):
-        recent_re = filter_data_within_radius(
-            st.session_state.config['coords'][0], 
-            st.session_state.config['coords'][1], 
-            st.session_state.re_data, 
-            3.0 # 3km radius
-        )
-        
-    if not recent_re.empty:
-        col1, col2 = st.columns([1, 1])
-        
-        with col1:
-            st.markdown('<div class="dashboard-card"><h4>💰 가격대별 분포 (억 단위)</h4>', unsafe_allow_html=True)
-            fig_hist = px.histogram(recent_re, x="price_억", nbins=30, 
-                                   color_discrete_sequence=[THEME['primary']],
-                                   labels={'price_억': '거래가 (억 원)', 'count': '거래 건수'})
-            fig_hist.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                margin=dict(t=10, b=10, l=10, r=10), height=350
-            )
-            st.plotly_chart(fig_hist, use_container_width=True)
+            folium_map = create_folium_map(st.session_state.config['coords'][0], st.session_state.config['coords'][1], filtered_facilities, st.session_state.config['radius'])
+            map_interaction = st_folium(folium_map, width="100%", height=500, key="main_map")
+            
+            if map_interaction and map_interaction.get("last_clicked"):
+                nc = (map_interaction["last_clicked"]["lat"], map_interaction["last_clicked"]["lng"])
+                if round(nc[0], 5) != round(st.session_state.config['coords'][0], 5):
+                    st.session_state.config['coords'] = nc
+                    st.session_state.config['address'] = f"지정 포인트 ({nc[0]:.4f}, {nc[1]:.4f})"
+                    st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-        with col2:
-            avg_price = recent_re['price_억'].mean()
-            median_price = recent_re['price_억'].median()
-            max_price = recent_re['price_억'].max()
+        with col_r:
+            if t_score >= 90: grade_char = "s"
+            elif t_score >= 75: grade_char = "a"
+            elif t_score >= 60: grade_char = "b"
+            elif t_score >= 40: grade_char = "c"
+            else: grade_char = "d"
             
             st.markdown(f"""
-            <div class="dashboard-card" style="height: 100%;">
-                <h4>📋 3km 반경 시장 요약</h4>
-                <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #64748b;">평균 거래가</span>
-                        <span style="font-weight: 700; color: {THEME['primary']};">{avg_price:.1f}억</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #64748b;">중간 거래가</span>
-                        <span style="font-weight: 700;">{median_price:.1f}억</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #64748b;">최고 거래가</span>
-                        <span style="font-weight: 700; color: #ef4444;">{max_price:.1f}억</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #64748b;">분석 거래 건수</span>
-                        <span style="font-weight: 700;">{len(recent_re):,}건</span>
-                    </div>
-                </div>
-                <p style="font-size: 0.8rem; color: #64748b; margin-top: 20px;">
-                    * 최근 2023-2026년 서울시 실거래가 데이터 기준이며, 전용면적 및 노후도에 따라 차이가 있을 수 있습니다.
-                </p>
+            <div class="dashboard-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 20px;">
+            <h3 style="text-align: center; margin-bottom: 10px;">💡 종합 편의 기여도</h3>
+            <div class="metric-value">{t_score}</div>
+            <div class="grade-badge grade-{grade_char}">{grade_char.upper()} GRADE</div>
+            <div style="margin-top: 25px; width: 100%;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:bold; color:#64748b; font-size: 0.8rem;">
+            <span>0</span><span>100</span>
+            </div>
+            <div style="background: #e2e8f0; border-radius: 12px; height: 16px; width: 100%; overflow: hidden;">
+            <div style="background: linear-gradient(90deg, {THEME['primary']}, {THEME['accent']}); width: {t_score}%; height: 100%; border-radius: 12px;"></div>
+            </div>
+            </div>
+            <p style="text-align: center; color: #64748b; margin-top: 20px; font-size: 0.9rem;">주변 인프라 밀도 분석 결과입니다.</p>
             </div>
             """, unsafe_allow_html=True)
+
+        # 8. Detailed Charts
+        st.markdown("### 📈 상세 데이터 분석")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.markdown('<div class="dashboard-card"><h4>📊 카테고리 밸런스</h4>', unsafe_allow_html=True)
+            st.plotly_chart(viz['radar'], use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        with c2:
+            st.markdown('<div class="dashboard-card"><h4>⚖️ 인프라 구성 비교</h4>', unsafe_allow_html=True)
+            st.plotly_chart(viz['compare'], use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        with c3:
+            st.markdown('<div class="dashboard-card"><h4>📋 주요 시설 통계</h4>', unsafe_allow_html=True)
+            stats_df = pd.DataFrame(counts.items(), columns=['분류', '개수']).sort_values('개수', ascending=False)
+            st.dataframe(stats_df, hide_index=True, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with st.expander("📍 전체 시설 리스트 보기", expanded=False):
+            if facilities:
+                st.dataframe(pd.DataFrame(facilities)[['group', 'name', 'distance', 'emoji']], use_container_width=True)
+            else:
+                st.info("데이터가 없습니다.")
+
+    with tab2:
+        # 9. Real Estate Analysis Section (3km Radius)
+        st.markdown("### 🏠 반경 3km 내 실거래가 분포 분석")
+        
+        with st.spinner("주변 실거래 데이터 분석 중..."):
+            recent_re = filter_data_within_radius(
+                st.session_state.config['coords'][0], 
+                st.session_state.config['coords'][1], 
+                st.session_state.re_data, 
+                3.0 # 3km radius
+            )
             
-        st.markdown('<div class="dashboard-card"><h4>📍 실거래 위치 분포 (최근 500건)</h4>', unsafe_allow_html=True)
-        p_map = create_price_map(st.session_state.config['coords'][0], st.session_state.config['coords'][1], recent_re, 3.0)
-        st_folium(p_map, width="100%", height=500, key="re_price_map")
-        st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        st.warning("반경 3km 내에 필터링된 실거래 데이터가 없습니다.")
+        if not recent_re.empty:
+            col1, col2 = st.columns([1, 1])
+            
+            with col1:
+                st.markdown('<div class="dashboard-card"><h4>💰 가격대별 분포 (억 단위)</h4>', unsafe_allow_html=True)
+                fig_hist = px.histogram(recent_re, x="price_억", nbins=30, 
+                                       color_discrete_sequence=[THEME['primary']],
+                                       labels={'price_억': '거래가 (억 원)', 'count': '거래 건수'})
+                fig_hist.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    margin=dict(t=10, b=10, l=10, r=10), height=350
+                )
+                st.plotly_chart(fig_hist, use_container_width=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+
+            with col2:
+                avg_price = recent_re['price_억'].mean()
+                median_price = recent_re['price_억'].median()
+                max_price = recent_re['price_억'].max()
+                
+                st.markdown(f"""
+                <div class="dashboard-card" style="height: 100%;">
+                    <h4>📋 3km 반경 시장 요약</h4>
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #64748b;">평균 거래가</span>
+                            <span style="font-weight: 700; color: {THEME['primary']};">{avg_price:.1f}억</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #64748b;">중간 거래가</span>
+                            <span style="font-weight: 700;">{median_price:.1f}억</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #64748b;">최고 거래가</span>
+                            <span style="font-weight: 700; color: #ef4444;">{max_price:.1f}억</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #64748b;">분석 거래 건수</span>
+                            <span style="font-weight: 700;">{len(recent_re):,}건</span>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+            st.markdown('<div class="dashboard-card"><h4>📍 실거래 위치 분포 (최근 500건)</h4>', unsafe_allow_html=True)
+            p_map = create_price_map(st.session_state.config['coords'][0], st.session_state.config['coords'][1], recent_re, 3.0)
+            st_folium(p_map, width="100%", height=500, key="re_price_map")
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            st.warning("반경 3km 내에 필터링된 실거래 데이터가 없습니다.")
 
 if __name__ == "__main__":
     main()
