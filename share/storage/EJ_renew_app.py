@@ -98,7 +98,6 @@ def inject_custom_css():
             border: 1px solid rgba(226, 232, 240, 0.8);
             margin-bottom: 1.2rem;
             transition: all 0.3s ease;
-            overflow: hidden; /* 박스 밖으로 내용 안 넘게 추가 */
         }}
         
         .dashboard-card:hover {{
@@ -665,7 +664,12 @@ def main():
         # 6. Performance Layout (Map & Gauge)
         col_l, col_r = st.columns([2, 1])
         with col_l:
-            st.markdown(f'<div class="dashboard-card"><h3>🗺️ 인프라 분포도: {st.session_state.config["address"]}</h3>', unsafe_allow_html=True)
+            st.markdown(f'''
+            <div class="dashboard-card" style="padding: 10px 24px; display: flex; align-items: center; min-height: 50px; margin-bottom: 0.8rem;">
+                <h3 style="margin: 0; line-height: 1.2;">🗺️ 인프라 분포도: {st.session_state.config["address"]}</h3>
+            </div>
+            ''', unsafe_allow_html=True)
+            st.markdown('<div class="dashboard-card" style="padding-top: 1rem;">', unsafe_allow_html=True)
             
             # 지도 필터 UI
             selected_groups = st.multiselect("표시할 시설 선택", options=list(CATEGORY_GROUPS.keys()), default=list(CATEGORY_GROUPS.keys()), key="map_view_filter")
@@ -710,15 +714,30 @@ def main():
         st.markdown("### 📈 상세 데이터 분석")
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.markdown('<div class="dashboard-card"><h4>📊 카테고리 밸런스</h4>', unsafe_allow_html=True)
+            st.markdown(f'''
+            <div class="dashboard-card" style="padding: 10px 24px; display: flex; align-items: center; min-height: 50px; margin-bottom: 0.8rem;">
+                <h4 style="margin: 0; line-height: 1.2;">📊 카테고리 밸런스</h4>
+            </div>
+            ''', unsafe_allow_html=True)
+            st.markdown('<div class="dashboard-card" style="padding-top: 1rem;">', unsafe_allow_html=True)
             st.plotly_chart(viz['radar'], use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
         with c2:
-            st.markdown('<div class="dashboard-card"><h4>⚖️ 인프라 구성 비교</h4>', unsafe_allow_html=True)
+            st.markdown(f'''
+            <div class="dashboard-card" style="padding: 10px 24px; display: flex; align-items: center; min-height: 50px; margin-bottom: 0.8rem;">
+                <h4 style="margin: 0; line-height: 1.2;">⚖️ 인프라 구성 비교</h4>
+            </div>
+            ''', unsafe_allow_html=True)
+            st.markdown('<div class="dashboard-card" style="padding-top: 1rem;">', unsafe_allow_html=True)
             st.plotly_chart(viz['compare'], use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
         with c3:
-            st.markdown('<div class="dashboard-card"><h4>📋 주요 시설 통계</h4>', unsafe_allow_html=True)
+            st.markdown(f'''
+            <div class="dashboard-card" style="padding: 10px 24px; display: flex; align-items: center; min-height: 50px; margin-bottom: 0.8rem;">
+                <h4 style="margin: 0; line-height: 1.2;">📋 주요 시설 통계</h4>
+            </div>
+            ''', unsafe_allow_html=True)
+            st.markdown('<div class="dashboard-card" style="padding-top: 1rem;">', unsafe_allow_html=True)
             stats_df = pd.DataFrame(counts.items(), columns=['분류', '개수']).sort_values('개수', ascending=False)
             st.dataframe(stats_df, hide_index=True, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -757,10 +776,15 @@ def main():
             col1, col2 = st.columns([1, 1])
             
             with col1:
-                # 박스 스타일 수동 적용 (제목 포함)
-                st.markdown(f'<div class="dashboard-card" style="height: 480px; padding: 1.5rem;">', unsafe_allow_html=True)
-                st.markdown(f'<h4 style="margin-top: 0; color: {THEME["secondary"]};">💰 면적 대비 가격 분포 (산포도)</h4>', unsafe_allow_html=True)
-                
+                # 제목 박스 (높이 축소 및 중앙 정렬)
+                st.markdown(f'''
+                <div class="dashboard-card" style="padding: 10px 24px; display: flex; align-items: center; min-height: 50px; margin-bottom: 0.8rem;">
+                    <h4 style="margin: 0; line-height: 1.2;">💰 면적 대비 가격 분포 (산포도)</h4>
+                </div>
+                ''', unsafe_allow_html=True)
+
+                # 차트 카드
+                st.markdown('<div class="dashboard-card" style="padding-top: 1rem;">', unsafe_allow_html=True)
                 fig_scatter = px.scatter(recent_re, x="ARCH_AREA", y="price_억",
                                        color="price_억", color_continuous_scale="Viridis",
                                        hover_data=["BLDG_NM", "RCPT_YR"],
@@ -768,15 +792,20 @@ def main():
                 fig_scatter.update_layout(
                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                     font=dict(family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif", color=THEME['secondary']),
-                    margin=dict(t=20, b=40, l=40, r=20), height=380,
-                    showlegend=False,
-                    xaxis=dict(gridcolor='#f1f5f9', zeroline=False),
-                    yaxis=dict(gridcolor='#f1f5f9', zeroline=False)
+                    margin=dict(t=10, b=10, l=10, r=10), height=350,
+                    showlegend=False
                 )
-                st.plotly_chart(fig_scatter, use_container_width=True, key="real_estate_scatter")
+                st.plotly_chart(fig_scatter, use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
 
             with col2:
+                # 제목 박스 (높이 축소 및 중앙 정렬)
+                st.markdown(f'''
+                <div class="dashboard-card" style="padding: 10px 24px; display: flex; align-items: center; min-height: 50px; margin-bottom: 0.8rem;">
+                    <h4 style="margin: 0; line-height: 1.2;">📋 3km 반경 시장 요약</h4>
+                </div>
+                ''', unsafe_allow_html=True)
+
                 avg_price = recent_re['price_억'].mean()
                 median_price = recent_re['price_억'].median()
                 
@@ -786,11 +815,9 @@ def main():
                 max_bldg = max_row['BLDG_NM']
                 max_area = max_row['ARCH_AREA']
                 
-                # col1과 세로 높이(480px)를 맞춤
                 st.markdown(f"""
-                <div class="dashboard-card" style="height: 480px; display: flex; flex-direction: column;">
-                    <h4 style="margin-top: 0;">📋 3km 반경 시장 요약</h4>
-                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 10px 0;">
+                <div class="dashboard-card" style="height: 388px; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
                         <div style="display: flex; justify-content: space-between;">
                             <span style="color: #64748b;">평균 거래가</span>
                             <span style="font-weight: 700; color: {THEME['primary']};">{avg_price:.1f}억</span>
@@ -814,7 +841,13 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
                 
-            st.markdown('<div class="dashboard-card"><h4>📍 실거래 위치 분포 (최근 500건)</h4>', unsafe_allow_html=True)
+            # 위치 분포 지도 제목 박스
+            st.markdown(f'''
+            <div class="dashboard-card" style="padding: 10px 24px; display: flex; align-items: center; min-height: 50px; margin-bottom: 0.8rem;">
+                <h4 style="margin: 0; line-height: 1.2;">📍 실거래 위치 분포 (최근 500건)</h4>
+            </div>
+            ''', unsafe_allow_html=True)
+            st.markdown('<div class="dashboard-card" style="padding-top: 1rem;">', unsafe_allow_html=True)
             p_map = create_price_map(st.session_state.config['coords'][0], st.session_state.config['coords'][1], recent_re, 3.0)
             st_folium(p_map, width="100%", height=500, key="re_price_map")
             st.markdown('</div>', unsafe_allow_html=True)
