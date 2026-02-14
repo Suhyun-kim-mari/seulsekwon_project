@@ -90,7 +90,7 @@ def inject_custom_css():
             color: {THEME['text_main']} !important;
         }}
         
-        .dashboard-card, div[data-testid="stForm"], div[data-testid="stPlotlyChart"] {{
+        .dashboard-card, div[data-testid="stForm"] {{
             background: {THEME['card_bg']};
             padding: 1.5rem;
             border-radius: 1.2rem;
@@ -98,6 +98,7 @@ def inject_custom_css():
             border: 1px solid rgba(226, 232, 240, 0.8);
             margin-bottom: 1.2rem;
             transition: all 0.3s ease;
+            overflow: hidden; /* 박스 밖으로 내용 안 넘게 추가 */
         }}
         
         .dashboard-card:hover {{
@@ -756,22 +757,24 @@ def main():
             col1, col2 = st.columns([1, 1])
             
             with col1:
+                # 박스 스타일 수동 적용 (제목 포함)
+                st.markdown(f'<div class="dashboard-card" style="height: 480px; padding: 1.5rem;">', unsafe_allow_html=True)
+                st.markdown(f'<h4 style="margin-top: 0; color: {THEME["secondary"]};">💰 면적 대비 가격 분포 (산포도)</h4>', unsafe_allow_html=True)
+                
                 fig_scatter = px.scatter(recent_re, x="ARCH_AREA", y="price_억",
                                        color="price_억", color_continuous_scale="Viridis",
                                        hover_data=["BLDG_NM", "RCPT_YR"],
                                        labels={'ARCH_AREA': '전용면적 (㎡)', 'price_억': '거래가 (억 원)'})
                 fig_scatter.update_layout(
-                    title=dict(
-                        text="💰 면적 대비 가격 분포 (산포도)",
-                        font=dict(family="Pretendard", size=20, color=THEME['secondary']),
-                        x=0, y=0.95
-                    ),
                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                     font=dict(family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif", color=THEME['secondary']),
-                    margin=dict(t=60, b=10, l=10, r=10), height=380,
-                    showlegend=False
+                    margin=dict(t=20, b=40, l=40, r=20), height=380,
+                    showlegend=False,
+                    xaxis=dict(gridcolor='#f1f5f9', zeroline=False),
+                    yaxis=dict(gridcolor='#f1f5f9', zeroline=False)
                 )
                 st.plotly_chart(fig_scatter, use_container_width=True, key="real_estate_scatter")
+                st.markdown('</div>', unsafe_allow_html=True)
 
             with col2:
                 avg_price = recent_re['price_억'].mean()
@@ -783,10 +786,11 @@ def main():
                 max_bldg = max_row['BLDG_NM']
                 max_area = max_row['ARCH_AREA']
                 
+                # col1과 세로 높이(480px)를 맞춤
                 st.markdown(f"""
-                <div class="dashboard-card" style="height: 100%;">
-                    <h4>📋 3km 반경 시장 요약</h4>
-                    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                <div class="dashboard-card" style="height: 480px; display: flex; flex-direction: column;">
+                    <h4 style="margin-top: 0;">📋 3km 반경 시장 요약</h4>
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 10px 0;">
                         <div style="display: flex; justify-content: space-between;">
                             <span style="color: #64748b;">평균 거래가</span>
                             <span style="font-weight: 700; color: {THEME['primary']};">{avg_price:.1f}억</span>
