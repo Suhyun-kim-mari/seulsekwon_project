@@ -376,6 +376,44 @@ def get_ai_analysis_report(t_score, counts, weights):
 
     return report
 
+def get_ai_real_estate_report(re_data):
+    """실거래가 데이터를 분석하여 AI 리포트를 생성합니다."""
+    if re_data.empty:
+        return "현재 반경 3km 내에 최근 실거래 데이터가 충분하지 않아 분석이 어렵습니다."
+
+    avg_price = re_data['price_억'].mean()
+    median_price = re_data['price_억'].median()
+    max_row = re_data.loc[re_data['price_억'].idxmax()]
+    vol = len(re_data)
+    
+    # 가격대별 비율 계산
+    high_tier = len(re_data[re_data['price_억'] >= 20])
+    mid_tier = len(re_data[(re_data['price_억'] >= 10) & (re_data['price_억'] < 20)])
+    
+    # 시장 성격 진단
+    if avg_price >= 20:
+        market_type = "초고가 주거 단지 중심의 **하이엔드 시장**"
+    elif avg_price >= 12:
+        market_type = "서울 상위권 시세를 형성하고 있는 **고급 주거지**"
+    elif avg_price >= 8:
+        market_type = "안정적인 실거주 수요가 뒷받침되는 **중상급 시장**"
+    else:
+        market_type = "진입 장벽이 상대적으로 낮은 **보급형/가성비 위주 시장**"
+        
+    report = f"이 지역은 평균 거래가 **{avg_price:.1f}억**으로 구성된 {market_type}입니다.<br>"
+    report += f"최근 3km 반경 내에서 총 **{vol:,}건**의 거래가 발생했으며, "
+    
+    if high_tier > 20:
+        report += "**20억 이상의 초고가 거래**가 빈번하게 발생하는 상급지 특성을 보입니다. "
+    elif mid_tier > (vol * 0.3):
+        report += "**10억~20억 사이의 중고가 거래**가 활발하여 시장 활력이 높은 편입니다. "
+    else:
+        report += "대부분 중저가 위주의 거래가 주를 이루며 **실수요 중심**으로 시장이 형성되어 있습니다. "
+        
+    report += f"<br>최고가 매물은 **{max_row['BLDG_NM']}**({max_row['price_억']:.1f}억)으로, 해당 지역의 **랜드마크 단지** 역할을 하고 있습니다."
+    
+    return report
+
 def create_viz_objects(total_score, scores, counts, facilities, raw_progress):
     layout_base = dict(
         paper_bgcolor='rgba(0,0,0,0)', 
@@ -703,6 +741,18 @@ def main():
             )
             
         if not recent_re.empty:
+            # AI 실거래 분석 리포트 추가
+            st.markdown(f'### 🤖 AI 실거래 시장 분석')
+            re_ai_report = get_ai_real_estate_report(recent_re)
+            st.markdown(f"""
+            <div class="dashboard-card" style="border-left: 5px solid {THEME['primary']}; display: flex; align-items: flex-start; gap: 15px;">
+            <div style="font-size: 1.5rem; margin-top: 5px;">📊</div>
+            <div style="flex: 1;">
+            <p style="font-size: 1.1rem; line-height: 1.7; margin: 0; color: {THEME['text_main']};">{re_ai_report}</p>
+            </div>
+            </div>
+            """, unsafe_allow_html=True)
+
             col1, col2 = st.columns([1, 1])
             
             with col1:
