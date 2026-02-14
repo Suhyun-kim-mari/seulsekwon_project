@@ -183,7 +183,7 @@ def get_dong_name(address):
 def load_infrastructure_data():
     """최종 통합된 인프라 데이터를 로드합니다."""
     # 최종 통합 및 중복 제거된 데이터 파일 경로 (v2)
-    file_path = "/Users/kimsuhyun/Desktop/fcicb6/seoul_seulsekwon/data/seoul_combined_data_final_v2.csv"
+    file_path = "/Users/kimsuhyun/Desktop/fcicb6/seoul_seulsekwon/data/seoul_combined_data_final_v3.csv"
     
     if not os.path.exists(file_path):
         # 상대 경로 시도
