@@ -240,7 +240,10 @@ def load_real_estate_data():
     try:
         # RCPT_YR,THING_AMT,BLDG_NM,BLDG_USG,latitude,longitude 등 필요 컬럼만 로드
         df = pd.read_csv(file_path, usecols=['RCPT_YR', 'CGG_NM', 'STDG_NM', 'BLDG_NM', 'THING_AMT', 'ARCH_AREA', 'BLDG_USG', 'latitude', 'longitude'])
-        df = df.dropna(subset=['latitude', 'longitude', 'THING_AMT'])
+        # 건물명(BLDG_NM)이 없거나 위도/경도/금액 정보가 없는 행 삭제
+        df = df.dropna(subset=['latitude', 'longitude', 'THING_AMT', 'BLDG_NM'])
+        # 빈 문자열도 처리
+        df = df[df['BLDG_NM'].astype(str).str.strip() != ""]
         # THING_AMT는 만 원 단위이므로 억 단위로 변환 (표시용)
         df['price_억'] = df['THING_AMT'] / 10000.0
         # 평당 가격 계산 (ARCH_AREA: 전용면적 m2)
