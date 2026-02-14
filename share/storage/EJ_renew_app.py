@@ -226,6 +226,53 @@ def load_infrastructure_data():
         st.error(f"데이터 파일을 읽는 중 오류 발생: {e}")
         return pd.DataFrame()
 
+@st.cache_data
+def load_real_estate_data():
+    """서울실거래가 데이터를 로드합니다."""
+    file_path = "share/data/seoul_real_estate_combined_2023_2026_geo.csv"
+    if not os.path.exists(file_path):
+        current_dir = os.path.dirname(__file__)
+        file_path = os.path.join(current_dir, "..", "data", "seoul_real_estate_combined_2023_2026_geo.csv")
+        if not os.path.exists(file_path):
+            st.error(f"실거래가 데이터 파일을 찾을 수 없습니다: {file_path}")
+            return pd.DataFrame()
+
+    try:
+        # RCPT_YR,THING_AMT,BLDG_NM,BLDG_USG,latitude,longitude 등 필요 컬럼만 로드
+        df = pd.read_csv(file_path, usecols=['RCPT_YR', 'CGG_NM', 'STDG_NM', 'BLDG_NM', 'THING_AMT', 'ARCH_AREA', 'BLDG_USG', 'latitude', 'longitude'])
+        df = df.dropna(subset=['latitude', 'longitude', 'THING_AMT'])
+        # THING_AMT는 만 원 단위이므로 억 단위로 변환 (표시용)
+        df['price_억'] = df['THING_AMT'] / 10000.0
+        # 평당 가격 계산 (ARCH_AREA: 전용면적 m2)
+        df['price_per_m2'] = df['THING_AMT'] / df['ARCH_AREA']
+        df['price_per_pyung'] = df['price_per_m2'] * 3.30578
+        return df
+    except Exception as e:
+        st.error(f"실거래가 데이터를 읽는 중 오류 발생: {e}")
+        return pd.DataFrame()
+
+def filter_data_within_radius(center_lat, center_lon, data, radius_km):
+    """지정한 반경 내의 데이터를 필터링합니다."""
+    if data.empty:
+        return pd.DataFrame()
+    
+    # 1차 사각 필터링 (속도 최적화)
+    lat_margin = radius_km / 111.0
+    lon_margin = radius_km / (111.0 * 0.8) # 대략적인 서울 위도 기준
+    
+    mask = (data['latitude'].between(center_lat - lat_margin, center_lat + lat_margin)) & \
+           (data['longitude'].between(center_lon - lon_margin, center_lon + lon_margin))
+    candidates = data[mask].copy()
+    
+    if candidates.empty:
+        return pd.DataFrame()
+        
+    # 2차 정밀 거리 필터링
+    candidates['distance'] = candidates.apply(
+        lambda row: geodesic((center_lat, center_lon), (row['latitude'], row['longitude'])).meters, axis=1
+    )
+    return candidates[candidates['distance'] <= (radius_km * 1000)].copy()
+
 def calculate_seulsekwon_index(center_lat, center_lon, data, weights, radius_m):
     if data.empty:
         return 0.0, {}, {}, [], {}
@@ -392,6 +439,37 @@ def create_folium_map(lat, lon, facilities, radius_m):
                       popup=f"<b>{f['name']}</b><br>{f['distance']:.0f}m ({f['sub_category']})").add_to(m)
     return m
 
+def create_price_map(lat, lon, re_data, radius_km):
+    """실거래가 분포를 보여주는 지도를 생성합니다."""
+    m = folium.Map(location=[lat, lon], zoom_start=14, tiles="cartodbpositron")
+    folium.Circle([lat, lon], radius=radius_km*1000, color='gray', fill=True, fill_opacity=0.05).add_to(m)
+    
+    # 가격대에 따른 색상 맵핑
+    def get_color(amt_ok):
+        if amt_ok >= 20: return 'darkred'    # 20억 이상
+        if amt_ok >= 15: return 'red'        # 15억 이상
+        if amt_ok >= 10: return 'orange'     # 10억 이상
+        if amt_ok >= 5: return 'green'       # 5억 이상
+        return 'blue'                        # 5억 미만
+
+    # 상위 500개만 표시 (성능)
+    display_data = re_data.sort_values('RCPT_YR', ascending=False).head(500)
+    
+    for _, row in display_data.iterrows():
+        color = get_color(row['price_억'])
+        folium.CircleMarker(
+            location=[row['latitude'], row['longitude']],
+            radius=5,
+            color=color,
+            fill=True,
+            fill_color=color,
+            fill_opacity=0.7,
+            popup=f"<b>{row['BLDG_NM']}</b><br>가격: {row['price_억']:.1f}억<br>면적: {row['ARCH_AREA']:.1f}㎡<br>연도: {row['RCPT_YR']}",
+            tooltip=f"{row['BLDG_NM']} ({row['price_억']:.1f}억)"
+        ).add_to(m)
+    
+    return m
+
 # ==========================================
 # 5. UI Implementation
 # ==========================================
@@ -415,6 +493,10 @@ def main():
             'radius': 500,
             'weights': DEFAULT_WEIGHTS.copy()
         }
+
+    if 're_data' not in st.session_state:
+        with st.spinner("🏥 실거래가 통계 정보 로드 중..."):
+            st.session_state.re_data = load_real_estate_data()
 
     # 3. Search Form (강력하게 개선된 버전)
     with st.container():
@@ -568,6 +650,72 @@ def main():
             st.dataframe(pd.DataFrame(facilities)[['group', 'name', 'distance', 'emoji']], use_container_width=True)
         else:
             st.info("데이터가 없습니다.")
+
+    # 9. Real Estate Analysis Section (3km Radius)
+    st.markdown("---")
+    st.markdown("### 🏠 반경 3km 내 실거래가 분포 분석")
+    
+    with st.spinner("주변 실거래 데이터 분석 중..."):
+        recent_re = filter_data_within_radius(
+            st.session_state.config['coords'][0], 
+            st.session_state.config['coords'][1], 
+            st.session_state.re_data, 
+            3.0 # 3km radius
+        )
+        
+    if not recent_re.empty:
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.markdown('<div class="dashboard-card"><h4>💰 가격대별 분포 (억 단위)</h4>', unsafe_allow_html=True)
+            fig_hist = px.histogram(recent_re, x="price_억", nbins=30, 
+                                   color_discrete_sequence=[THEME['primary']],
+                                   labels={'price_억': '거래가 (억 원)', 'count': '거래 건수'})
+            fig_hist.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                margin=dict(t=10, b=10, l=10, r=10), height=350
+            )
+            st.plotly_chart(fig_hist, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with col2:
+            avg_price = recent_re['price_억'].mean()
+            median_price = recent_re['price_억'].median()
+            max_price = recent_re['price_억'].max()
+            
+            st.markdown(f"""
+            <div class="dashboard-card" style="height: 100%;">
+                <h4>📋 3km 반경 시장 요약</h4>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #64748b;">평균 거래가</span>
+                        <span style="font-weight: 700; color: {THEME['primary']};">{avg_price:.1f}억</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #64748b;">중간 거래가</span>
+                        <span style="font-weight: 700;">{median_price:.1f}억</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #64748b;">최고 거래가</span>
+                        <span style="font-weight: 700; color: #ef4444;">{max_price:.1f}억</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #64748b;">분석 거래 건수</span>
+                        <span style="font-weight: 700;">{len(recent_re):,}건</span>
+                    </div>
+                </div>
+                <p style="font-size: 0.8rem; color: #64748b; margin-top: 20px;">
+                    * 최근 2023-2026년 서울시 실거래가 데이터 기준이며, 전용면적 및 노후도에 따라 차이가 있을 수 있습니다.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        st.markdown('<div class="dashboard-card"><h4>📍 실거래 위치 분포 (최근 500건)</h4>', unsafe_allow_html=True)
+        p_map = create_price_map(st.session_state.config['coords'][0], st.session_state.config['coords'][1], recent_re, 3.0)
+        st_folium(p_map, width="100%", height=500, key="re_price_map")
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.warning("반경 3km 내에 필터링된 실거래 데이터가 없습니다.")
 
 if __name__ == "__main__":
     main()
