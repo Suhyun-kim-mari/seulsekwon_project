@@ -17,7 +17,10 @@ import datetime
 # 1. Configuration & Constants
 # ==========================================
 
-load_dotenv()
+# .env 파일 로드 (부모 디렉토리의 .env 탐색)
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+env_path = os.path.join(base_dir, '.env')
+load_dotenv(env_path)
 
 st.set_page_config(
     page_title="서울 슬세권 분석 시스템 v2.5",
@@ -132,6 +135,227 @@ def inject_custom_css():
         /* Hide menu */
         #MainMenu {{visibility: hidden;}}
         footer {{visibility: hidden;}}
+
+        /* Footer Styling */
+        .custom-footer {{
+            margin-top: 5rem;
+            padding: 3rem 1rem;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }}
+        
+        .footer-content {{
+            max-width: 800px;
+            margin: 0 auto;
+        }}
+        
+        .footer-links {{
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }}
+
+        /* Floating Report Button */
+        .report-btn {{
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: white !important;
+            padding: 0.8rem 1.5rem;
+            border-radius: 2rem;
+            box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            transition: all 0.3s ease;
+        }}
+        
+        .report-btn:hover {{
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(225, 29, 72, 0.6);
+        }}
+        
+        /* Home Page Styles */
+        .hero-section {{
+            padding: 6rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 2rem;
+            color: white;
+            margin-bottom: 3rem;
+        }}
+        
+        .hero-title {{
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }}
+        
+        .intro-section {{
+            padding: 4rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }}
+        
+        .team-card {{
+            background: white;
+            padding: 1.5rem 1rem;
+            border-radius: 1rem;
+            border: 1px solid #f1f5f9;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+        }}
+        
+        .team-card:hover {{
+            border-color: #3b82f6;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }}
+        
+        .team-avatar {{
+            width: 70px;
+            height: 70px;
+            background: #f8fafc;
+            border-radius: 50%;
+            margin: 0 auto 1rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            border: 2px solid #eff6ff;
+        }}
+        
+        .member-name {{
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.2rem;
+        }}
+        
+        .member-role-title {{
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }}
+        
+        /* Updated Search Bar Style (Pill Shape with Icon) */
+        div[data-testid="stForm"] {{
+            border: none !important;
+            padding: 0 !important;
+            background: transparent !important;
+        }}
+        
+        .search-container {{
+            max-width: 650px;
+            margin: 0 auto;
+            position: relative;
+        }}
+        
+        div[data-testid="stTextInput"] input {{
+            border-radius: 2.5rem !important;
+            padding: 1rem 3rem 1rem 1.5rem !important;
+            font-size: 1rem !important;
+            border: 1px solid #e0e0e0 !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 1.5rem center;
+            background-size: 1.2rem;
+            transition: all 0.3s ease;
+        }}
+        
+        div[data-testid="stTextInput"] input:focus {{
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+            border-color: #3b82f6 !important;
+            outline: none !important;
+        }}
+        
+        div[data-testid="stTextInput"] input::placeholder {{
+            color: #9e9e9e !important;
+            opacity: 1;
+        }}
+
+        .search-sample-text {{
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #70757a;
+            font-size: 0.9rem;
+        }}
+        
+        .stButton > button, div[data-testid="stFormSubmitButton"] > button {{
+            border-radius: 2.5rem !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }}
+        
+        div[data-testid="stFormSubmitButton"] > button {{
+            background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
+            color: white !important;
+            border: none !important;
+            height: 3rem !important;
+            padding: 0 1.5rem !important;
+        }}
+        
+        div[data-testid="stFormSubmitButton"] > button:hover {{
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4) !important;
+            transform: translateY(-1px) !important;
+        }}
+        
+        /* Sample Keyword Buttons Styling (Shadow no border) */
+        div[data-testid="column"] button:not([kind="primary"]) {{
+            border: none !important;
+            background-color: white !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06) !important;
+            color: #4b5563 !important;
+            font-size: 0.85rem !important;
+            padding: 0.5rem 1rem !important;
+            height: auto !important;
+            min-height: 2.2rem !important;
+        }}
+        
+        div[data-testid="column"] button:not([kind="primary"]):hover {{
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1) !important;
+            color: {THEME['primary']} !important;
+            transform: translateY(-1px);
+        }}
+        
+        .member-tasks {{
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: left;
+            margin-top: 1rem;
+            padding-left: 0;
+            list-style: none;
+        }}
+        
+        .member-tasks li {{
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.4rem;
+        }}
+        
+        .member-tasks li::before {{
+            content: "•";
+            color: #cbd5e1;
+        }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -149,27 +373,50 @@ def get_kakao_api_key():
     return os.getenv("KAKAO_REST_API_KEY")
 
 @st.cache_data(ttl=3600)
-def get_coords_from_address(address: str):
-    """주소를 위도/경도로 변환합니다."""
+def get_coords_from_address(query: str):
+    """주소 또는 장소명(ex. 강남경찰서)으로 좌표를 검색합니다. (키워드 -> 주소 순차 검색)"""
     api_key = get_kakao_api_key()
     if not api_key:
+        st.error("카카오 API 키가 설정되지 않았습니다.")
         return None
         
-    url = "https://dapi.kakao.com/v2/local/search/keyword.json"
     headers = {"Authorization": f"KakaoAK {api_key}"}
+
+    # 1. 키워드 검색 시도 (장소명 위주)
+    url_kw = "https://dapi.kakao.com/v2/local/search/keyword.json"
     try:
-        response = requests.get(url, headers=headers, params={"query": address}, timeout=5)
-        if response.status_code == 200:
-            result = response.json()
-            if result['documents']:
-                info = result['documents'][0]
+        res_kw = requests.get(url_kw, headers=headers, params={"query": query, "size": 1}, timeout=5)
+        if res_kw.status_code == 200:
+            data = res_kw.json()
+            if data['documents']:
+                info = data['documents'][0]
+                return {
+                    "address_name": info.get('place_name', info.get('address_name', query)),
+                    "lat": float(info['y']),
+                    "lng": float(info['x'])
+                }
+        elif res_kw.status_code == 401 and "ip mismatched" in res_kw.text:
+            st.error("❌ 카카오 API IP 인증 오류가 발생했습니다. 개발자 센터에 현재 서버 IP를 등록해주세요.")
+    except Exception as e:
+        pass # 키워드 실패 시 주소 검색으로 넘어감
+
+    # 2. 주소 검색 시도 (새주소, 지번주소 위주)
+    url_addr = "https://dapi.kakao.com/v2/local/search/address.json"
+    try:
+        res_addr = requests.get(url_addr, headers=headers, params={"query": query, "size": 1}, timeout=5)
+        if res_addr.status_code == 200:
+            data = res_addr.json()
+            if data['documents']:
+                info = data['documents'][0]
+                # 주소 검색 결과에서 좌표 추출
                 return {
                     "address_name": info['address_name'],
                     "lat": float(info['y']),
                     "lng": float(info['x'])
                 }
     except Exception as e:
-        st.error(f"주소 검색 중 오류 발생: {e}")
+        st.error(f"좌표 변환 중 예외 발생: {e}")
+
     return None
 
 def get_dong_name(address):
@@ -363,45 +610,161 @@ def create_folium_map(lat, lon, facilities, radius_m):
 # 5. UI Implementation
 # ==========================================
 
-def main():
-    inject_custom_css()
+def render_home_page():
+    # 1. Hero Section
+    st.markdown("""
+        <div class="hero-section">
+            <h1 class="hero-title">SEOUL SEULSEKWON ANALYTICS</h1>
+            <p style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 2rem;">
+                우리 동네 편의시설, 얼마나 가까울까요? 데이터를 통한 객관적인 슬세권 분석 서비스
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
     
-    # 1. State Initialization
-    if 'data' not in st.session_state:
-        with st.status("🚀 분석 엔진 준비 중...", expanded=True) as status:
-            st.session_state.data = load_infrastructure_data()
-            if not st.session_state.data.empty:
-                status.update(label=f"준비 완료 ({len(st.session_state.data):,}건 로드)", state="complete")
+    # 2. Search Box Section
+    st.markdown('<div class="search-container">', unsafe_allow_html=True)
+    
+    # Use a form to capture Enter key
+    with st.form("google_search_form", clear_on_submit=False):
+        c1, c2 = st.columns([4, 1])
+        with c1:
+            query = st.text_input("📍 분석할 위치 (주소 또는 키워드)", 
+                                 placeholder="Search", 
+                                 label_visibility="collapsed")
+        with c2:
+            btn_submit = st.form_submit_button("검색", use_container_width=True)
+    
+    # Sample Keywords (Horizontal Layout)
+    samples = ["성수동 갤러리아포레", "서초 아크로비스타", "센텀 퍼스트 삼성"]
+    cols = st.columns([1.2, 1.5, 1.5, 1.5, 0.3]) 
+    
+    selected_sample = None
+    with cols[0]:
+        st.markdown('<p style="margin-top: 0.5rem; color: #70757a; font-size: 0.9rem; text-align: right; font-weight: 500;">💡 추천 키워드:</p>', unsafe_allow_html=True)
+    with cols[1]:
+        if st.button(samples[0], key="sample_1", use_container_width=True):
+            selected_sample = samples[0]
+    with cols[2]:
+        if st.button(samples[1], key="sample_2", use_container_width=True):
+            selected_sample = samples[1]
+    with cols[3]:
+        if st.button(samples[2], key="sample_3", use_container_width=True):
+            selected_sample = samples[2]
+
+    # Handle Search Logic
+    search_query = selected_sample if selected_sample else (query if btn_submit else None)
+    
+    if search_query:
+        with st.spinner(f"'{search_query}' 분석 준비 중..."):
+            res = get_coords_from_address(search_query)
+            if res:
+                st.session_state.config['coords'] = (res['lat'], res['lng'])
+                st.session_state.config['address'] = res['address_name']
+                st.session_state.page = 'dashboard'
+                st.rerun()
             else:
-                st.error("데이터 로드 실패")
-                st.stop()
-    
-    if 'config' not in st.session_state:
-        st.session_state.config = {
-            'coords': (37.5665, 126.9780),
-            'address': "서울시청",
-            'radius': 500,
-            'weights': DEFAULT_WEIGHTS.copy()
-        }
+                st.error("위치를 찾을 수 없습니다. 주소를 다시 상세히 확인해주세요.")
+                
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.write("") # Spacing
 
-    # 2. Main Header
-    st.markdown(f'<h1 style="text-align: center; color: {THEME["secondary"]}; margin-bottom: 2rem;">🏙️ SEOUL SEULSEKWON ANALYTICS</h1>', unsafe_allow_html=True)
+    # 3. Service Introduction
+    st.markdown("### 💡 서비스 소개")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("""
+        <div class="dashboard-card" style="height: 100%;">
+            <h4>📊 데이터 기반 분석</h4>
+            <p style="color: #64748b;">서울시 공공데이터를 활용하여 실제 편의시설 분포를 분석합니다.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c2:
+        st.markdown("""
+        <div class="dashboard-card" style="height: 100%;">
+            <h4>⚖️ 나만의 가중치</h4>
+            <p style="color: #64748b;">카페가 중요한지, 병원이 중요한지 직접 가중치를 설정할 수 있습니다.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c3:
+        st.markdown("""
+        <div class="dashboard-card" style="height: 100%;">
+            <h4>🗺️ 직관적인 지도</h4>
+            <p style="color: #64748b;">주변 시설을 한눈에 파악할 수 있는 시각화된 지도를 제공합니다.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # 3. Search Form
+    # 4. Team Introduction (Expander Toggle)
+    st.write("")
+    with st.expander("👥 서울 슬세권 분석팀 R&R (Role and Responsibilities)", expanded=True):
+        st.write("")
+        
+        # 6 virtual members
+        team_members = [
+            {
+                "emoji": "🙋‍♂️", "nick": "팀장", "name": "김서울", "role": "Project Leader",
+                "tasks": ["슬세권 통합 지수 모델 설계", "전체 프로젝트 기획 및 총괄"]
+            },
+            {
+                "emoji": "👨‍💻", "nick": "기술장인", "name": "이테크", "role": "System Arch",
+                "tasks": ["Streamlit 대시보드 시스템 구축", "전체 프레임워크 최적화"]
+            },
+            {
+                "emoji": "📊", "nick": "데이터허브", "name": "박데이터", "role": "Data Engineer",
+                "tasks": ["서울시 공공데이터 API 연동", "인프라 데이터 파이프라인 구축"]
+            },
+            {
+                "emoji": "🎨", "nick": "시각화장인", "name": "최비즈", "role": "UI/UX Designer",
+                "tasks": ["인터랙티브 차트 및 지도 설계", "Futuristic 디자인 시스템 적용"]
+            },
+            {
+                "emoji": "📍", "nick": "지오마스터", "name": "정지도", "role": "GIS Specialist",
+                "tasks": ["Kakao API 기반 지오코딩 구현", "공간 분석 알고리즘 최적화"]
+            },
+            {
+                "emoji": "✅", "nick": "품질요정", "name": "한검증", "role": "QA / Support",
+                "tasks": ["데이터 신뢰도 검증 및 정제", "사용자 피드백 및 에러 대응"]
+            }
+        ]
+
+        cols = st.columns(6)
+        for i, member in enumerate(team_members):
+            with cols[i]:
+                st.markdown(f"""
+                <div class="team-card">
+                    <div class="team-avatar">{member['emoji']}</div>
+                    <div class="member-name">{member['nick']} / {member['name']}</div>
+                    <div class="member-role-title">{member['role']}</div>
+                    <ul class="member-tasks">
+                        {" ".join([f"<li>{task}</li>" for task in member['tasks']])}
+                    </ul>
+                </div>
+                """, unsafe_allow_html=True)
+
+def render_dashboard_page():
+    # 2. Main Header (Internal)
+    c1, c2 = st.columns([5, 1])
+    with c1:
+        st.markdown(f'<h2 style="color: {THEME["secondary"]}; margin: 0;">🗺️ 분석 결과: {st.session_state.config["address"]}</h2>', unsafe_allow_html=True)
+    with c2:
+        if st.button("🏠 홈으로 돌아가기", use_container_width=True):
+            st.session_state.page = 'home'
+            st.rerun()
+
+    # 3. Search Form (Sidebar or Internal)
     with st.container():
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
         with st.form("search_form"):
             c1, c2, c3 = st.columns([3, 1, 1])
             with c1:
-                query = st.text_input("📍 분석할 위치 (주소 또는 키워드)", value=st.session_state.config['address'])
+                query = st.text_input("📍 위치 변경", value=st.session_state.config['address'])
             with c2:
                 radius = st.select_slider("📏 반경 (m)", options=[300, 500, 700, 1000, 1500], value=st.session_state.config['radius'])
             with c3:
                 st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
-                btn_submit = st.form_submit_button("지수 산출하기", use_container_width=True)
+                btn_submit = st.form_submit_button("다시 분석하기", use_container_width=True)
                 
         if btn_submit and query:
-            with st.spinner("위치 동기화 중..."):
+            with st.spinner("위치 업데이트 중..."):
                 res = get_coords_from_address(query)
                 if res:
                     st.session_state.config['coords'] = (res['lat'], res['lng'])
@@ -424,13 +787,13 @@ def main():
 
     # 5. Layout - Sidebar
     with st.sidebar:
-        st.title("⚙️ 설정 및 보고서")
+        st.title("⚙️ 분석 설정")
         
         with st.expander("⚖️ 가중치 커스터마이징", expanded=True):
             st.caption("인프라 기여도 가중치를 합계 100으로 조정하세요.")
             new_weights = {}
             for cat, w_val in st.session_state.config['weights'].items():
-                new_weights[cat] = st.slider(cat, 0, 50, w_val, step=5)
+                new_weights[cat] = st.slider(cat, 0, 50, w_val, step=5, key=f"sidebar_{cat}")
             
             cur_sum = sum(new_weights.values())
             if cur_sum == 100:
@@ -447,7 +810,6 @@ def main():
 
         st.markdown("---")
         st.subheader("📥 결과 다운로드")
-        # 간단한 JSON 또는 CSV 내보내기 가능
         st.download_button("📊 분석 데이터 CSV", data=pd.DataFrame(facilities).to_csv(index=False).encode('utf-8-sig'), 
                            file_name=f"analysis_{datetime.datetime.now().strftime('%Y%m%d')}.csv", use_container_width=True)
         
@@ -458,11 +820,10 @@ def main():
     col_l, col_r = st.columns([2, 1])
     
     with col_l:
-        st.markdown(f'<div class="dashboard-card"><h3>🗺️ 인프라 분포도: {st.session_state.config["address"]}</h3>', unsafe_allow_html=True)
+        st.markdown(f'<div class="dashboard-card"><h3>🗺️ 인프라 분포도</h3>', unsafe_allow_html=True)
         folium_map = create_folium_map(st.session_state.config['coords'][0], st.session_state.config['coords'][1], facilities, st.session_state.config['radius'])
         map_interaction = st_folium(folium_map, width="100%", height=500, key="main_map")
         
-        # 지도 클릭시 중심지 변경 로직
         if map_interaction and map_interaction.get("last_clicked"):
             nc = (map_interaction["last_clicked"]["lat"], map_interaction["last_clicked"]["lng"])
             if round(nc[0], 5) != round(st.session_state.config['coords'][0], 5):
@@ -504,5 +865,57 @@ def main():
         else:
             st.info("데이터가 없습니다.")
 
+def main():
+    inject_custom_css()
+    
+    # 1. State Initialization
+    if 'data' not in st.session_state:
+        with st.status("🚀 분석 엔진 준비 중...", expanded=True) as status:
+            st.session_state.data = load_infrastructure_data()
+            if not st.session_state.data.empty:
+                status.update(label=f"준비 완료 ({len(st.session_state.data):,}건 로드)", state="complete")
+            else:
+                st.error("데이터 로드 실패")
+                st.stop()
+    
+    if 'page' not in st.session_state:
+        st.session_state.page = 'home'
+
+    if 'config' not in st.session_state:
+        st.session_state.config = {
+            'coords': (37.5665, 126.9780),
+            'address': "서울시청",
+            'radius': 500,
+            'weights': DEFAULT_WEIGHTS.copy()
+        }
+
+    # Page Routing
+    if st.session_state.page == 'home':
+        render_home_page()
+    else:
+        render_dashboard_page()
+
+    # 8. Shared Footer Section
+    st.markdown("""
+        <div class="custom-footer">
+            <div class="footer-content">
+                <p>💡 <b>본 서비스는 fcicb6 데이터분석 코스 프로젝트의 일환으로 제작되었습니다.</b></p>
+                <div class="footer-links">
+                    <span>📊 <b>참고 데이터:</b> 서울시 공공데이터포털, 카카오 API, 소상공인시장진흥공단</span>
+                    <span>✉️ <b>문의 contact:</b> <a href="mailto:samplenotreal@gmail.com" style="color: #3b82f6; text-decoration: none;">samplenotreal@gmail.com</a></span>
+                </div>
+                <p style="margin-top: 1.5rem; font-size: 0.8rem; opacity: 0.6;">© 2026 SEOUL SEULSEKWON ANALYTICS. All rights reserved.</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # 9. Shared Floating Report Button
+    st.markdown("""
+        <a href="https://forms.gle/UAQXVBgi9owJ7JgF8" target="_blank" class="report-btn" style="text-decoration: none;">
+            🚨 오류 제보하기
+        </a>
+    """, unsafe_allow_html=True)
+
 if __name__ == "__main__":
+    import time
     main()
