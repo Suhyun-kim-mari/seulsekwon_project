@@ -4,5 +4,13 @@ __pycache__/
 *.pyc
 .DS_Store
 .env
-data/
+
+# Data files (Un-ignored for tracking)
+!data/seoul_real_estate_2023_all.csv
+!data/seoul_real_estate_2024_all.csv
+!data/seoul_real_estate_2025_all.csv
+!data/seoul_real_estate_2026_all.csv
+!data/seoul_real_estate_combined_2023_2026.csv
+!data/seoul_real_estate_combined_2023_2026_geo.csv
+
 output/
