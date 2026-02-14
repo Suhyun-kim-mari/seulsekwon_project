@@ -699,7 +699,12 @@ def main():
             with col2:
                 avg_price = recent_re['price_억'].mean()
                 median_price = recent_re['price_억'].median()
-                max_price = recent_re['price_억'].max()
+                
+                # 최고가 매물 정보 추출
+                max_row = recent_re.loc[recent_re['price_억'].idxmax()]
+                max_price = max_row['price_억']
+                max_bldg = max_row['BLDG_NM']
+                max_area = max_row['ARCH_AREA']
                 
                 st.markdown(f"""
                 <div class="dashboard-card" style="height: 100%;">
@@ -713,9 +718,12 @@ def main():
                             <span style="color: #64748b;">중간 거래가</span>
                             <span style="font-weight: 700;">{median_price:.1f}억</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <span style="color: #64748b;">최고 거래가</span>
-                            <span style="font-weight: 700; color: #ef4444;">{max_price:.1f}억</span>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 700; color: #ef4444;">{max_price:.1f}억</div>
+                                <div style="font-size: 0.8rem; color: #64748b;">{max_bldg} ({max_area:.1f}㎡)</div>
+                            </div>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
                             <span style="color: #64748b;">분석 거래 건수</span>
