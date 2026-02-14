@@ -90,7 +90,7 @@ def inject_custom_css():
             color: {THEME['text_main']} !important;
         }}
         
-        .dashboard-card, div[data-testid="stForm"] {{
+        .dashboard-card, div[data-testid="stForm"], div[data-testid="stPlotlyChart"] {{
             background: {THEME['card_bg']};
             padding: 1.5rem;
             border-radius: 1.2rem;
@@ -761,20 +761,17 @@ def main():
                                        hover_data=["BLDG_NM", "RCPT_YR"],
                                        labels={'ARCH_AREA': '전용면적 (㎡)', 'price_억': '거래가 (억 원)'})
                 fig_scatter.update_layout(
+                    title=dict(
+                        text="💰 면적 대비 가격 분포 (산포도)",
+                        font=dict(family="Pretendard", size=20, color=THEME['secondary']),
+                        x=0, y=0.95
+                    ),
                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                     font=dict(family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif", color=THEME['secondary']),
-                    margin=dict(t=10, b=10, l=10, r=10), height=350,
+                    margin=dict(t=60, b=10, l=10, r=10), height=380,
                     showlegend=False
                 )
-                
-                # 차트를 HTML로 변환하여 카드 내부에 직접 삽입 (레이아웃 일관성)
-                fig_html = fig_scatter.to_html(include_plotlyjs='cdn', full_html=False, config={'displayModeBar': False})
-                st.markdown(f'''
-                <div class="dashboard-card" style="height: 100%;">
-                    <h4 style="margin-bottom: 0.5rem;">💰 면적 대비 가격 분포 (산포도)</h4>
-                    <div style="width: 100%;">{fig_html}</div>
-                </div>
-                ''', unsafe_allow_html=True)
+                st.plotly_chart(fig_scatter, use_container_width=True, key="real_estate_scatter")
 
             with col2:
                 avg_price = recent_re['price_억'].mean()
