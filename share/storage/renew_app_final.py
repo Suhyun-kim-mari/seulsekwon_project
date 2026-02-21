@@ -360,6 +360,30 @@ def get_coords_from_address(query: str):
 
     return None
 
+@st.cache_data(ttl=3600)
+def get_address_from_coords(lat: float, lng: float):
+    """좌표를 주소로 변환합니다. (역지오코딩)"""
+    api_key = get_kakao_api_key()
+    if not api_key:
+        return f"지정 포인트 ({lat:.4f}, {lng:.4f})"
+        
+    url = "https://dapi.kakao.com/v2/local/geo/coord2address.json"
+    headers = {"Authorization": f"KakaoAK {api_key}"}
+    try:
+        res = requests.get(url, headers=headers, params={"x": lng, "y": lat}, timeout=5)
+        if res.status_code == 200:
+            data = res.json()
+            if data['documents']:
+                info = data['documents'][0]
+                # 도로명 주소를 1순위로, 지번 주소를 2순위로 반환
+                if info.get('road_address'):
+                    return info['road_address']['address_name']
+                if info.get('address'):
+                    return info['address']['address_name']
+    except:
+        pass
+    return f"지정 포인트 ({lat:.4f}, {lng:.4f})"
+
 @st.cache_data
 def load_infrastructure_data():
     file_path = "share/data/seoul_combined_data_final_v3.csv"
@@ -988,11 +1012,13 @@ def render_dashboard():
             folium_map = create_folium_map(st.session_state.config['coords'][0], st.session_state.config['coords'][1], filtered_facilities, st.session_state.config['radius'])
             map_interaction = st_folium(folium_map, width="100%", height=500, key="main_map")
             if map_interaction and map_interaction.get("last_clicked"):
-                nc = (map_interaction["last_clicked"]["lat"], map_interaction["last_clicked"]["lng"])
-                if round(nc[0], 5) != round(st.session_state.config['coords'][0], 5):
-                    st.session_state.config['coords'] = nc
-                    st.session_state.config['address'] = f"지정 포인트 ({nc[0]:.4f}, {nc[1]:.4f})"
-                    st.rerun()
+                with st.spinner("지도 위치의 주소를 가져오는 중..."):
+                    nc = (map_interaction["last_clicked"]["lat"], map_interaction["last_clicked"]["lng"])
+                    if round(nc[0], 5) != round(st.session_state.config['coords'][0], 5):
+                        st.session_state.config['coords'] = nc
+                        new_address = get_address_from_coords(nc[0], nc[1])
+                        st.session_state.config['address'] = new_address
+                        st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_r:
