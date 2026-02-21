@@ -859,7 +859,7 @@ def render_landing_page():
     <div style="text-align: center; font-size: 1.5rem; font-weight: 800; margin-top: 4rem; letter-spacing: 0.1em; color: gray;">TEAM MEMBERS</div>
     <div class="team-container">
         <div class="team-member">
-            <div class="team-avatar">👩🏻‍💻</div>
+            <div class="team-avatar">🐱</div>
             <div class="team-name">강예지</div>
             <div class="team-desc">
                 팀 회의록 관리<br>
@@ -867,7 +867,7 @@ def render_landing_page():
             </div>
         </div>
         <div class="team-member">
-            <div class="team-avatar">👩🏻‍💻</div>
+            <div class="team-avatar">🥸</div>
             <div class="team-name">김수현</div>
             <div class="team-desc">
                 팀 프로젝트 총괄<br>
@@ -875,7 +875,7 @@ def render_landing_page():
             </div>
         </div>
         <div class="team-member">
-            <div class="team-avatar">👩🏻‍💻</div>
+            <div class="team-avatar">🏄‍♀️</div>
             <div class="team-name">선미향</div>
             <div class="team-desc">
                 데이터 수집 및 분석<br>
@@ -883,7 +883,7 @@ def render_landing_page():
             </div>
         </div>
         <div class="team-member">
-            <div class="team-avatar">👩🏻‍💻</div>
+            <div class="team-avatar">🐕</div>
             <div class="team-name">안은지</div>
             <div class="team-desc">
                 데이터 시각화 및 대시보드 디자인<br>
@@ -891,7 +891,7 @@ def render_landing_page():
             </div>
         </div>
         <div class="team-member">
-            <div class="team-avatar">👩🏻‍💻</div>
+            <div class="team-avatar">☺️</div>
             <div class="team-name">장희재</div>
             <div class="team-desc">
                 데이터 수집 및 가공<br>
@@ -899,7 +899,7 @@ def render_landing_page():
             </div>
         </div>
         <div class="team-member">
-            <div class="team-avatar">👩🏻‍💻</div>
+            <div class="team-avatar">😊</div>
             <div class="team-name">최승연</div>
             <div class="team-desc">
                 프로젝트 설계 및 디자인<br>
